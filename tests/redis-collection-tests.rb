@@ -1,6 +1,7 @@
 require 'test/unit'
 require 'json'
-class RedisCollectionTests < Test::Unit::TestCase
+require_relative '../lib/RedisCollection'
+class RedisCollectionAddTests < Test::Unit::TestCase
 
 	def test_When_add_is_called_Then_RedisWrapper_is_set_with_json_value_of_object
 		item = { x: 0, y: -3 } 
@@ -24,72 +25,5 @@ class RedisCollectionTests < Test::Unit::TestCase
 	def set(item = {})
 		@redis_set_value = item
 		@redis_set_called = true
-	end
-end
-
-class RedisCollection
-
-	def initialize(redis_store)
-		@redis_store = redis_store
-		@collection_serializer = CollectionSerializer.new(@redis_store)
-		@items =  []
-	end
-
-	def add(item)		
-		@items = @collection_serializer.deserialize
-		@items.push(item)
-		@collection_serializer.serialize(@items)
-	end
-end
-
-class CollectionSerializer
-	ITEM_SEPARATOR = " , "
-	def initialize(redis_wrapper)
-		@redis_wrapper = redis_wrapper
-	end
-
-	def serialize(collection)
-		json_collection = collection.map do |item|
-			item.to_json
-		end
-		json_string = json_collection.join(ITEM_SEPARATOR)
-		@redis_wrapper.set(json_string)
-	end
-
-	def deserialize
-		json_string =  @redis_wrapper.get || ""
-		redis_contents = json_string.split(ITEM_SEPARATOR)
-		redis_contents.map do |item|
-			JSON.parse(item, :symbolize_names => true)
-		end
-	end
-end
-
-
-class RedisSettings
-	attr_accessor :host, :port, :password
-	def initialize(options)
-		@host = options[:host]
-		@port = options[:port]
-		@password = options[:password]
-	end
-end
-
-
-class RedisConnection
-	require 'redis'
-
-	def initialize(redis_settings)
-		@redis =  Redis.new(:host => redis_settings.host_name,
-							:port => redis_settings.port,
-							:password =>  redis_settings.password)
-	end
-
-	def set(options)
-		@redis.set(options[:key],options[:value])
-	end
-
-	def get(options)
-		@redis.get(options[:key])
 	end
 end
