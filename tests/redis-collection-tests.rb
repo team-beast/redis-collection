@@ -28,7 +28,6 @@ class RedisCollectionTests < Test::Unit::TestCase
 end
 
 class RedisCollection
-	ITEM_SEPARATOR = " , "
 
 	def initialize(redis_store)
 		@redis_store = redis_store
@@ -63,5 +62,34 @@ class CollectionSerializer
 		redis_contents.map do |item|
 			JSON.parse(item, :symbolize_names => true)
 		end
+	end
+end
+
+
+class RedisSettings
+	attr_accessor :host, :port, :password
+	def initialize(options)
+		@host = options[:host]
+		@port = options[:port]
+		@password = options[:password]
+	end
+end
+
+
+class RedisConnection
+	require 'redis'
+
+	def initialize(redis_settings)
+		@redis =  Redis.new(:host => redis_settings.host_name,
+							:port => redis_settings.port,
+							:password =>  redis_settings.password)
+	end
+
+	def set(options)
+		@redis.set(options[:key],options[:value])
+	end
+
+	def get(options)
+		@redis.get(options[:key])
 	end
 end
