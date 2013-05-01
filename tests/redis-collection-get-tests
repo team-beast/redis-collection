@@ -1,0 +1,27 @@
+require 'test/unit'
+require 'json'
+require_relative '../lib/RedisCollection'
+
+class RedisCollectionGetTests < Test::Unit::TestCase
+	
+	def test_When_get_called_on_repository_Then_get_called_on_Connection
+		@get_was_called = false
+		redis_collection = RedisCollection.new(self)
+		redis_collection.get
+		assert_equal(true, @get_was_called)		
+	end
+
+	def test_When_redis_contains_content_And_get_called_on_repository_Then_returns_correct_objects
+		item = {x:0,y:1}
+		@redis_contents = item.to_json
+		redis_collection = RedisCollection.new(self)
+		result = redis_collection.get
+		assert_equal([item], result)		
+	end
+
+	def get		
+		@get_was_called=true
+		@redis_contents
+	end
+	
+end
